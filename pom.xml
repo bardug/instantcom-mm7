@@ -4,7 +4,7 @@
 	<groupId>net.instantcom.mm7</groupId>
 	<artifactId>instantcom-mm7</artifactId>
 	<name>InstantCom MM7 Client</name>
-	<version>0.9.2</version>
+	<version>0.9.4</version>
 	<description>InstantCom MMS MM7 protocol client implementation</description>
 	<packaging>jar</packaging>
 	<url>https://github.com/vnesek/instantcom-mm7</url>
@@ -111,15 +111,68 @@
 						<encoding>utf-8</encoding>
 					</configuration>
 				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>2.4</version>
+					<executions>
+						<execution>
+							<id>attach-sources</id>
+							<goals>
+								<goal>jar-no-fork</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>2.10.1</version>
+					<executions>
+						<execution>
+							<id>attach-javadocs</id>
+							<goals>
+								<goal>jar</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.jfrog.buildinfo</groupId>
+					<artifactId>artifactory-maven-plugin</artifactId>
+					<version>2.6.1</version>
+					<inherited>false</inherited>
+					<executions>
+						<execution>
+							<id>build-info</id>
+							<goals>
+								<goal>publish</goal>
+							</goals>
+							<configuration>
+								<publisher>
+									<contextUrl>http://10.1.1.203:8080/artifactory</contextUrl>
+									<username>jenkins</username>
+									<password>jenkins</password>
+									<repoKey>libs-release-local</repoKey>
+									<snapshotRepoKey>libs-snapshot-local</snapshotRepoKey>
+								</publisher>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
 
 	<distributionManagement>
 		<snapshotRepository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			<id>ext-snapshot-local</id>
+			<url>http://10.1.1.203:8080/artifactory/ext-snapshot-local</url>
 		</snapshotRepository>
+		<repository>
+			<id>ext-release-local</id>
+			<url>http://10.1.1.203:8080/artifactory/ext-release-local</url>
+		</repository>
 	</distributionManagement>
 
 	<profiles>
