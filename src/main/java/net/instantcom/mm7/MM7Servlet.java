@@ -18,10 +18,6 @@
 
 package net.instantcom.mm7;
 
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.web.context.WebApplicationContext;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -31,85 +27,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class MM7Servlet extends HttpServlet {
-
-	public static final String VASP_BEAN_ATTRIBUTE = "net.instantcom.mm7.vasp_bean";
-	public static final String VASP_ATTRIBUTE = "net.instantcom.mm7.vasp";
-	public static final String MMSC_BEAN_ATTRIBUTE = "net.instantcom.mm7.mmsc_bean";
-	public static final String MMSC_ATTRIBUTE = "net.instantcom.mm7.mmsc";
+public abstract class MM7Servlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
-	public VASP getVasp() {
-		return vasp;
-	}
 
 	@Override
 	public void init() throws ServletException {
 		ServletContext servletContext = getServletConfig().getServletContext();
-		loadVASP(servletContext);
-		loadMMSC(servletContext);
+		loadReceiver(servletContext);
 	}
 
-	private void loadVASP(ServletContext servletContext) throws ServletException {
-		// try to load VASP from Spring context first
-		ApplicationContext applicationContext=
-				(ApplicationContext) servletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
-		if (applicationContext != null) {
-			String vaspBeanName = (String) servletContext.getAttribute(VASP_BEAN_ATTRIBUTE);
-			try {
-				vasp = applicationContext.getBean(vaspBeanName, VASP.class);
-			} catch (NoSuchBeanDefinitionException e) {
-				log("VASP bean wasn't found in Spring context. trying to load from servlet context");
-			}
-		}
-
-		// in case no VASP is available in Spring, try to load from servlet context
-		if (vasp == null) {
-			VASP vasp = (VASP) servletContext.getAttribute(VASP_ATTRIBUTE);
-			if (vasp == null) {
-				throw new ServletException(
-						"please add an instance of a VASP to a servlet context under key net.instantcom.mm7.vasp");
-			}
-		}
-	}
-
-	private void loadMMSC(ServletContext servletContext) throws ServletException {
-		// try to load MMSC from Spring context first
-		ApplicationContext applicationContext=
-				(ApplicationContext) servletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
-		if (applicationContext != null) {
-			String mmscBeanName = (String) servletContext.getAttribute(MMSC_BEAN_ATTRIBUTE);
-			try {
-				mmsc = applicationContext.getBean(mmscBeanName, MMSCServer.class);
-			} catch (NoSuchBeanDefinitionException e) {
-				log("MMSC bean wasn't found in Spring context. trying to load from servlet context");
-			}
-		}
-
-		// in case no MMSC is available in Spring, try to load from servlet context
-		if (mmsc == null) {
-			MMSCServer mmsc = (MMSCServer) servletContext.getAttribute(MMSC_ATTRIBUTE);
-			if (mmsc == null) {
-				throw new ServletException(
-						"please add an instance of a MMSC to a servlet context under key net.instantcom.mm7.mmsc");
-			}
-		}
-	}
-
-	public void setVasp(VASP vasp) {
-		this.vasp = vasp;
-	}
-
-	protected MM7Response dispatch(MM7Request req) throws MM7Error {
-		if (req instanceof DeliverReq) {
-			return vasp.deliver((DeliverReq) req);
-		} else if (req instanceof SubmitReq) {
-			return mmsc.receive((SubmitReq) req);
-		} else {
-			throw new MM7Error("method not supported");
-		}
-	}
+	protected abstract void loadReceiver(ServletContext servletContext) throws ServletException;
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -125,7 +54,7 @@ public class MM7Servlet extends HttpServlet {
 
 			MM7Request mm7request;
 			try {
-				mm7request = (MM7Request) MM7Message.load(in, req.getContentType(), getVasp().getContext());
+				mm7request = (MM7Request) MM7Message.load(in, req.getContentType(), getContext());
 			} finally {
 				in.close();
 			}
@@ -138,7 +67,7 @@ public class MM7Servlet extends HttpServlet {
 
 			OutputStream out = resp.getOutputStream();
 			try {
-				MM7Message.save(mm7response, out, getVasp().getContext());
+				MM7Message.save(mm7response, out, getContext());
 			} finally {
 				out.close();
 			}
@@ -149,6 +78,7 @@ public class MM7Servlet extends HttpServlet {
 		}
 	}
 
-	private VASP vasp;
-	private MMSCServer mmsc;
+	protected abstract MM7Context getContext();
+
+	protected abstract MM7Response dispatch(MM7Request req) throws MM7Error;
 }

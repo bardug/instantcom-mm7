@@ -5,7 +5,7 @@ package net.instantcom.mm7;
  * <p>
  * Created by amib on 17/5/2017.
  */
-public interface MMSCServer {
+public interface MMSCServer extends Contextual {
 
     SubmitRsp receive(SubmitReq submitReq) throws MM7Error;
 

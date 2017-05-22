@@ -49,7 +49,7 @@ public class MM7ServletInJettyWithSpring {
 
         // MM7 servlet
         ServletHolder mm7Servlet = new ServletHolder(MM7Servlet.class);
-        context.setAttribute(MM7Servlet.VASP_BEAN_ATTRIBUTE, "mm7Vasp"); // bean id as configured in spring xml context
+        context.setAttribute(MM7DeliverServlet.VASP_BEAN_ATTRIBUTE, "mm7Vasp"); // bean id as configured in spring xml context
         context.addServlet(mm7Servlet, "/mm7");
     }
 }

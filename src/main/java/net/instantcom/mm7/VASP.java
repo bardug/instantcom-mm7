@@ -25,7 +25,7 @@ package net.instantcom.mm7;
  *
  * TODO add all the other VASP methods
  */
-public interface VASP {
+public interface VASP extends Contextual {
 
 	/**
 	 * Handles message delivered from MMSC.
@@ -39,11 +39,4 @@ public interface VASP {
 	 *             if message can't be delivered
 	 */
 	DeliverRsp deliver(DeliverReq deliverReq) throws MM7Error;
-
-	/**
-	 * Context used for serializing/deserializing MM7 messages.
-	 *
-	 * @return context instance
-	 */
-	MM7Context getContext();
 }
