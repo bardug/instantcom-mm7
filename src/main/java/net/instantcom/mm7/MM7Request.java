@@ -20,6 +20,10 @@ package net.instantcom.mm7;
 
 import org.jdom2.Element;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 public class MM7Request extends MM7Message {
 
 	public String getVasId() {
@@ -79,6 +83,27 @@ public class MM7Request extends MM7Message {
 		setVaspId(req.getChildTextTrim("VASPID", req.getNamespace()));
 		setRelayServerId(req.getChildTextTrim("MMSRelayServerID", req.getNamespace()));
 	}
+
+	protected List<Address> extractRecipients(Element element) {
+		List<Address> recipientsList = new ArrayList<Address>();
+		if(element != null) {
+
+			Element recipientsTo = element.getChild("To", namespace);
+			if(recipientsTo != null) {
+
+				Iterator recipientsToIter = recipientsTo.getChildren().iterator();
+
+				while(recipientsToIter.hasNext()) {
+					Element recipientsBcc = (Element)recipientsToIter.next();
+					Address address = new Address();
+					address.load(recipientsBcc);
+					recipientsList.add(address);
+				}
+			}
+		}
+		return recipientsList;
+	}
+
 
 	public void setRelayServerId(String relayServerId) {
 		this.relayServerId = relayServerId;

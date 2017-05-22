@@ -22,7 +22,6 @@ import org.jdom2.Element;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 public class DeliverReq extends MM7Request implements HasContent {
@@ -110,26 +109,6 @@ public class DeliverReq extends MM7Request implements HasContent {
 		setPriority(Priority.valueOf(req.getChildTextTrim("Priority", namespace).toUpperCase()));
 		setTimeStamp(new RelativeDate(req.getChildTextTrim("TimeStamp", namespace)).toDate());
 
-	}
-
-	private List<Address> extractRecipients(Element element) {
-		List<Address> recipientsList = new ArrayList<Address>();
-		if(element != null) {
-
-			Element recipientsTo = element.getChild("To", namespace);
-			if(recipientsTo != null) {
-
-				Iterator recipientsToIter = recipientsTo.getChildren().iterator();
-
-				while(recipientsToIter.hasNext()) {
-					Element recipientsBcc = (Element)recipientsToIter.next();
-					Address address = new Address();
-					address.load(recipientsBcc);
-					recipientsList.add(address);
-				}
-			}
-		}
-		return recipientsList;
 	}
 
 	public void setApplicId(String applicId) {

@@ -18,13 +18,12 @@
 
 package net.instantcom.mm7;
 
+import net.instantcom.mm7.Address.RecipientType;
+import org.jdom2.Element;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import net.instantcom.mm7.Address.RecipientType;
-
-import org.jdom2.Element;
 
 public class SubmitReq extends MM7Request implements HasContent {
 
@@ -212,6 +211,43 @@ public class SubmitReq extends MM7Request implements HasContent {
 		}
 
 		return e;
+	}
+
+	@Override
+	public void load(Element element) {
+		super.load(element);
+
+		Element body = element.getChild("Body", MM7Message.ENVELOPE);
+		Element req = body.getChild("SubmitReq", namespace);
+
+		setMm7Version(req.getChildTextTrim("MM7Version", namespace));
+
+		Element senderIdElem = req.getChild("SenderIdentification", namespace);
+		if (senderIdElem != null) {
+			setVaspId(senderIdElem.getChildTextTrim("VASPID", namespace));
+			setVasId(senderIdElem.getChildTextTrim("VASID", namespace));
+			Address senderAddress = new Address();
+			senderAddress.load(senderIdElem.getChild("SenderAddress", namespace).getChildren().get(0));
+			setSenderAddress(senderAddress);
+		} else {
+			setSenderAddress(null);
+		}
+
+		setRecipients(extractRecipients(req.getChild("Recipients", namespace)));
+		setLinkedId(req.getChildTextTrim("LinkedID", namespace));
+		setServiceCode(req.getChildTextTrim("ServiceCode", namespace));
+		setMessageClass(MessageClass.map.get(req.getChildTextTrim("MessageClass", namespace)));
+		setChargedParty(ChargedParty.map.get(req.getChildTextTrim("ChargedParty", namespace)));
+		setSubject(req.getChildTextTrim("Subject", namespace));
+
+		String priority = req.getChildTextTrim("Priority", namespace);
+		if (priority != null) {
+			setPriority(Priority.valueOf(priority.toUpperCase()));
+		}
+		String timeStamp = req.getChildTextTrim("TimeStamp", namespace);
+		if (timeStamp != null) {
+			setTimeStamp(new RelativeDate(timeStamp).toDate());
+		}
 	}
 
 	public void setAllowAdaptations(Boolean allowAdaptations) {
