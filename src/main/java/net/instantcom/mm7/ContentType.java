@@ -201,7 +201,7 @@ public class ContentType implements Serializable {
 		if (params == null) {
 			params = new HashMap<String, String>();
 		}
-		params.put(name, value);
+		params.put(name.toLowerCase(), value);
 	}
 
 	/**
